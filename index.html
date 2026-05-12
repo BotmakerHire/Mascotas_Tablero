@@ -410,7 +410,7 @@ function render(d) {
       <div class="section-title">Funnel de hoy</div>
       <div class="funnel-card">
         ${funnelPasos.map((p, i) => {
-          const pctMostrar = i === 0 ? '100%' : pct(p.val, funnelPasos[i-1].val);
+          const pctMostrar = pct(p.val, funnelPasos[0].val);
           return `
             <div class="funnel-row">
               <div class="funnel-label">${p.label}</div>

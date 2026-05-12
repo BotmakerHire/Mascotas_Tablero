@@ -39,7 +39,6 @@
 
   .container { max-width: 1400px; margin: 0 auto; }
 
-  /* HEADER */
   .header {
     display: flex;
     justify-content: space-between;
@@ -87,7 +86,6 @@
     50% { opacity: 0.7; transform: scale(1.1); box-shadow: 0 0 0 6px rgba(16,185,129,0); }
   }
 
-  /* SECCIONES */
   .section { margin-bottom: 32px; }
   .section-title {
     font-size: 11px;
@@ -107,7 +105,6 @@
     background: var(--border);
   }
 
-  /* KPI GRID */
   .kpi-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -157,10 +154,7 @@
     font-size: 12px;
     color: var(--text-secondary);
   }
-  .kpi-sub.up { color: var(--green); }
-  .kpi-sub.down { color: var(--red); }
 
-  /* FUNNEL */
   .funnel-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -210,7 +204,6 @@
     font-weight: 600;
   }
 
-  /* CARDS GRID */
   .two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -239,7 +232,6 @@
     margin-bottom: 16px;
   }
 
-  /* A/B COMPARISON */
   .ab-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -298,13 +290,11 @@
   .ab-row.invalid span:last-child { color: var(--orange); }
   .ab-row.empty span:last-child { color: var(--red); }
 
-  /* CHART */
   .chart-container {
     position: relative;
     height: 250px;
   }
 
-  /* FOOTER */
   .footer {
     text-align: center;
     margin-top: 40px;
@@ -324,7 +314,6 @@
 <body>
 <div class="container">
 
-  <!-- HEADER -->
   <div class="header">
     <div class="header-left">
       <h1>🐾 Omint Mascotas</h1>
@@ -381,13 +370,11 @@ function render(d) {
   ];
 
   const seg = d.segmentos_7d;
-  // Definimos ganador: el que tiene más válidos
   const totales = [seg.empleado.validos, seg.cliente_promo_a.validos, seg.cliente_promo_b.validos];
   const maxIdx = totales.indexOf(Math.max(...totales));
 
   document.getElementById('content').innerHTML = `
 
-    <!-- KPIs PRINCIPALES -->
     <div class="section">
       <div class="section-title">Resumen de hoy</div>
       <div class="kpi-grid">
@@ -419,28 +406,28 @@ function render(d) {
       </div>
     </div>
 
-    <!-- FUNNEL DEL DÍA -->
     <div class="section">
       <div class="section-title">Funnel de hoy</div>
       <div class="funnel-card">
-        ${funnelPasos.map(p => `
-          <div class="funnel-row">
-            <div class="funnel-label">${p.label}</div>
-            <div class="funnel-bar-container">
-              <div class="funnel-bar" style="width: ${Math.max((p.val/max)*100, 4)}%; background: ${p.color};">
-                ${p.val}
+        ${funnelPasos.map((p, i) => {
+          const pctMostrar = i === 0 ? '100%' : pct(p.val, funnelPasos[i-1].val);
+          return `
+            <div class="funnel-row">
+              <div class="funnel-label">${p.label}</div>
+              <div class="funnel-bar-container">
+                <div class="funnel-bar" style="width: ${Math.max((p.val/max)*100, 4)}%; background: ${p.color};">
+                  ${p.val}
+                </div>
               </div>
+              <div class="funnel-pct">${pctMostrar}</div>
             </div>
-            <div class="funnel-pct">${pct(p.val, f.leads)}</div>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
     </div>
 
-    <!-- DOS COLUMNAS: EVOLUCIÓN + A/B -->
     <div class="two-col">
 
-      <!-- EVOLUCIÓN 7 DÍAS -->
       <div class="section">
         <div class="section-title">Evolución 7 días</div>
         <div class="card">
@@ -452,7 +439,6 @@ function render(d) {
         </div>
       </div>
 
-      <!-- A/B TESTING -->
       <div class="section">
         <div class="section-title">Comparativa por segmento</div>
         <div class="card">

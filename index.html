@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omint Mascotas — Dashboard en vivo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-card: #131829;
+    --bg-card-hover: #1a2038;
+    --border: rgba(255,255,255,0.06);
+    --border-strong: rgba(255,255,255,0.12);
+    --text-primary: #e8ecf4;
+    --text-secondary: #8b93a7;
+    --text-muted: #5a6178;
+    --accent: #6366f1;
+    --accent-2: #8b5cf6;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --blue: #3b82f6;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 24px;
+    background-image:
+      radial-gradient(at 20% 0%, rgba(99,102,241,0.08) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, rgba(139,92,246,0.08) 0px, transparent 50%);
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header-left h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header-left p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(16,185,129,0.12);
+    border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129,0.6); }
+    50% { opacity: 0.7; transform: scale(1.1); box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+  }
+
+  /* SECCIONES */
+  .section { margin-bottom: 32px; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* KPI GRID */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .kpi:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+  }
+  .kpi:hover::before { opacity: 1; }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .kpi-value {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -1px;
+    margin-bottom: 6px;
+  }
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .kpi-sub.up { color: var(--green); }
+  .kpi-sub.down { color: var(--red); }
+
+  /* FUNNEL */
+  .funnel-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .funnel-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .funnel-row:last-child { margin-bottom: 0; }
+  .funnel-label {
+    width: 180px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .funnel-bar-container {
+    flex: 1;
+    height: 36px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+  .funnel-bar {
+    height: 100%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 14px;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 40px;
+  }
+  .funnel-pct {
+    width: 60px;
+    text-align: right;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  /* CARDS GRID */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 900px) {
+    .two-col { grid-template-columns: 1fr; }
+    .funnel-label { width: 110px; font-size: 12px; }
+  }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+  }
+  .card-subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: -16px;
+    margin-bottom: 16px;
+  }
+
+  /* A/B COMPARISON */
+  .ab-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 700px) { .ab-grid { grid-template-columns: 1fr; } }
+  .ab-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    position: relative;
+  }
+  .ab-card.winner {
+    background: rgba(16,185,129,0.05);
+    border-color: rgba(16,185,129,0.3);
+  }
+  .ab-card.winner::before {
+    content: '🏆 Lidera';
+    position: absolute;
+    top: -10px;
+    right: 12px;
+    background: var(--green);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .ab-name {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .ab-total {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+  .ab-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .ab-row span:first-child { color: var(--text-secondary); }
+  .ab-row span:last-child { font-weight: 600; }
+  .ab-row.valid span:last-child { color: var(--green); }
+  .ab-row.invalid span:last-child { color: var(--orange); }
+  .ab-row.empty span:last-child { color: var(--red); }
+
+  /* CHART */
+  .chart-container {
+    position: relative;
+    height: 250px;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .footer span { color: var(--text-secondary); font-weight: 500; }
+
+  .loading {
+    text-align: center;
+    padding: 60px;
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <h1>🐾 Omint Mascotas</h1>
+      <p>Dashboard de actividad del bot en tiempo real</p>
+    </div>
+    <div class="live-badge">
+      <span class="live-dot"></span>
+      <span>En vivo</span>
+    </div>
+  </div>
+
+  <div id="content" class="loading">Cargando datos...</div>
+
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbyqwmlzsL4Gq0N0H1WKD3RS-gHc5hdsidZ03cUgnV3VoPVjvnkkm1LBbmJ9dwOFUfdUew/exec";
+const REFRESH_MS = 60000;
+let chartEvolucion = null;
+
+const tiempoRelativo = (iso) => {
+  if (!iso) return 'sin actividad';
+  const d = new Date(iso);
+  const diff = Math.floor((Date.now() - d.getTime()) / 1000);
+  if (diff < 60) return `hace ${diff}s`;
+  if (diff < 3600) return `hace ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `hace ${Math.floor(diff/3600)} hs`;
+  return `hace ${Math.floor(diff/86400)} días`;
+};
+
+const pct = (a, b) => b === 0 ? '0%' : Math.round((a/b)*100) + '%';
+
+async function cargar() {
+  try {
+    const res = await fetch(API_URL);
+    const d = await res.json();
+    render(d);
+  } catch (e) {
+    document.getElementById('content').innerHTML = `<div class="loading">Error al cargar datos. Reintentando...</div>`;
+  }
+}
+
+function render(d) {
+  const f = d.funnel_hoy;
+  const max = Math.max(f.leads, 1);
+
+  const funnelPasos = [
+    { label: 'Ingresaron al bot', val: f.leads, color: 'linear-gradient(90deg, #6366f1, #818cf8)' },
+    { label: 'Pidieron cotizar', val: f.quiero_cotizar, color: 'linear-gradient(90deg, #3b82f6, #60a5fa)' },
+    { label: 'Pasaron al agente IA', val: f.pre_agente, color: 'linear-gradient(90deg, #8b5cf6, #a78bfa)' },
+    { label: 'Llegaron a confirmar', val: f.pre_confirma, color: 'linear-gradient(90deg, #ec4899, #f472b6)' },
+    { label: 'Confirmaron plan', val: f.confirmo, color: 'linear-gradient(90deg, #f59e0b, #fbbf24)' },
+    { label: 'Completaron alta', val: f.fin_onboarding, color: 'linear-gradient(90deg, #10b981, #34d399)' }
+  ];
+
+  const seg = d.segmentos_7d;
+  // Definimos ganador: el que tiene más válidos
+  const totales = [seg.empleado.validos, seg.cliente_promo_a.validos, seg.cliente_promo_b.validos];
+  const maxIdx = totales.indexOf(Math.max(...totales));
+
+  document.getElementById('content').innerHTML = `
+
+    <!-- KPIs PRINCIPALES -->
+    <div class="section">
+      <div class="section-title">Resumen de hoy</div>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">Ingresos al bot</div>
+          <div class="kpi-value">${f.leads}</div>
+          <div class="kpi-sub">leads del día</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Confirmaron plan</div>
+          <div class="kpi-value">${f.confirmo}</div>
+          <div class="kpi-sub">${pct(f.confirmo, f.leads)} de los ingresos</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Altas completadas</div>
+          <div class="kpi-value">${d.altas.hoy}</div>
+          <div class="kpi-sub">${pct(d.altas.hoy, f.leads)} de los ingresos</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Última actividad</div>
+          <div class="kpi-value" style="font-size:22px;">${tiempoRelativo(d.ultima_actividad)}</div>
+          <div class="kpi-sub">timestamp más reciente</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Altas últimos 30 días</div>
+          <div class="kpi-value">${d.altas.ultimos_30d}</div>
+          <div class="kpi-sub">${d.altas.ultimos_7d} en últimos 7 días</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FUNNEL DEL DÍA -->
+    <div class="section">
+      <div class="section-title">Funnel de hoy</div>
+      <div class="funnel-card">
+        ${funnelPasos.map(p => `
+          <div class="funnel-row">
+            <div class="funnel-label">${p.label}</div>
+            <div class="funnel-bar-container">
+              <div class="funnel-bar" style="width: ${Math.max((p.val/max)*100, 4)}%; background: ${p.color};">
+                ${p.val}
+              </div>
+            </div>
+            <div class="funnel-pct">${pct(p.val, f.leads)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- DOS COLUMNAS: EVOLUCIÓN + A/B -->
+    <div class="two-col">
+
+      <!-- EVOLUCIÓN 7 DÍAS -->
+      <div class="section">
+        <div class="section-title">Evolución 7 días</div>
+        <div class="card">
+          <div class="card-title">Tendencia diaria</div>
+          <div class="card-subtitle">Leads · Confirmaciones · Altas</div>
+          <div class="chart-container">
+            <canvas id="chartEvolucion"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- A/B TESTING -->
+      <div class="section">
+        <div class="section-title">Comparativa por segmento</div>
+        <div class="card">
+          <div class="card-title">Sesiones de los últimos 7 días</div>
+          <div class="card-subtitle">Performance del agente IA por grupo</div>
+          <div class="ab-grid">
+            ${renderAB('Empleados', seg.empleado, maxIdx === 0 && seg.empleado.total > 0)}
+            ${renderAB('Cliente CON Promo', seg.cliente_promo_a, maxIdx === 1 && seg.cliente_promo_a.total > 0)}
+            ${renderAB('Cliente SIN Promo', seg.cliente_promo_b, maxIdx === 2 && seg.cliente_promo_b.total > 0)}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      Actualizado <span>${new Date(d.timestamp).toLocaleString('es-AR')}</span> · Se refresca cada 60 segundos
+    </div>
+  `;
+
+  renderChart(d.evolucion_7d);
+}
+
+function renderAB(nombre, data, esGanador) {
+  return `
+    <div class="ab-card ${esGanador ? 'winner' : ''}">
+      <div class="ab-name">${nombre}</div>
+      <div class="ab-total">${data.total}</div>
+      <div class="ab-row valid"><span>Con plan elegido</span><span>${data.validos}</span></div>
+      <div class="ab-row invalid"><span>Plan a normalizar</span><span>${data.invalidos}</span></div>
+      <div class="ab-row empty"><span>Sin elegir plan</span><span>${data.vacios}</span></div>
+      <div class="ab-row"><span>Tasa de éxito</span><span style="color: #10b981;">${pct(data.validos, data.total)}</span></div>
+    </div>
+  `;
+}
+
+function renderChart(evolucion) {
+  const ctx = document.getElementById('chartEvolucion').getContext('2d');
+  if (chartEvolucion) chartEvolucion.destroy();
+
+  chartEvolucion = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: evolucion.map(e => e.fecha),
+      datasets: [
+        {
+          label: 'Leads',
+          data: evolucion.map(e => e.leads),
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99,102,241,0.1)',
+          borderWidth: 2,
+          tension: 0.35,
+          fill: true,
+          pointRadius: 4,
+          pointBackgroundColor: '#6366f1',
+          pointBorderWidth: 0
+        },
+        {
+          label: 'Confirmaciones',
+          data: evolucion.map(e => e.confirmados),
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,0.1)',
+          borderWidth: 2,
+          tension: 0.35,
+          fill: true,
+          pointRadius: 4,
+          pointBackgroundColor: '#f59e0b',
+          pointBorderWidth: 0
+        },
+        {
+          label: 'Altas',
+          data: evolucion.map(e => e.altas),
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.1)',
+          borderWidth: 2,
+          tension: 0.35,
+          fill: true,
+          pointRadius: 4,
+          pointBackgroundColor: '#10b981',
+          pointBorderWidth: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#8b93a7',
+            font: { size: 11, family: 'Inter' },
+            usePointStyle: true,
+            pointStyle: 'circle',
+            padding: 14
+          }
+        },
+        tooltip: {
+          backgroundColor: '#0a0e1a',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          titleColor: '#e8ecf4',
+          bodyColor: '#8b93a7',
+          padding: 10
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#5a6178', font: { size: 11 } },
+          border: { display: false }
+        },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#5a6178', font: { size: 11 }, precision: 0 },
+          border: { display: false },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+cargar();
+setInterval(cargar, REFRESH_MS);
+</script>
+</body>
+</html>

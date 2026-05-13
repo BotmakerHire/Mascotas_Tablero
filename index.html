@@ -197,12 +197,32 @@
     min-width: 40px;
   }
   .funnel-pct {
-    width: 60px;
+    width: 100px;
     text-align: right;
     font-size: 13px;
     color: var(--text-secondary);
     font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
   }
+  .funnel-pct-main {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .funnel-delta {
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.2px;
+  }
+  .funnel-delta.neutral { color: var(--text-muted); }
+  .funnel-delta.low    { color: var(--green); }
+  .funnel-delta.mid    { color: var(--orange); }
+  .funnel-delta.high   { color: var(--red); }
 
   .two-col {
     display: grid;
@@ -330,7 +350,7 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyiWBY4DLidTjFa5TWMeGq00V-JOjEXIPQCJBLmYsESK-WyA3U_kIKugxDMqAuY0M7qEQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz4tunzLedk288CXnJ2uWel6nfeIa4iJV1pR7RFClPceSRh382FH5sB2wUVt5ThjCof/exec";
 const REFRESH_MS = 60000;
 let chartEvolucion = null;
 
@@ -411,6 +431,26 @@ function render(d) {
       <div class="funnel-card">
         ${funnelPasos.map((p, i) => {
           const pctMostrar = pct(p.val, funnelPasos[0].val);
+
+          // Delta vs paso anterior
+          let deltaHTML = '';
+          if (i === 0) {
+            deltaHTML = `<div class="funnel-delta neutral">inicio</div>`;
+          } else {
+            const prev = funnelPasos[i-1].val;
+            if (prev === 0) {
+              deltaHTML = `<div class="funnel-delta neutral">—</div>`;
+            } else {
+              const dropPct = Math.round(((prev - p.val) / prev) * 100);
+              let cls = 'low';
+              if (dropPct > 50) cls = 'high';
+              else if (dropPct > 20) cls = 'mid';
+              else if (dropPct <= 0) cls = 'neutral';
+              const signo = dropPct > 0 ? '−' : (dropPct < 0 ? '+' : '');
+              deltaHTML = `<div class="funnel-delta ${cls}">${signo}${Math.abs(dropPct)}% vs anterior</div>`;
+            }
+          }
+
           return `
             <div class="funnel-row">
               <div class="funnel-label">${p.label}</div>
@@ -419,7 +459,10 @@ function render(d) {
                   ${p.val}
                 </div>
               </div>
-              <div class="funnel-pct">${pctMostrar}</div>
+              <div class="funnel-pct">
+                <div class="funnel-pct-main">${pctMostrar}</div>
+                ${deltaHTML}
+              </div>
             </div>
           `;
         }).join('')}

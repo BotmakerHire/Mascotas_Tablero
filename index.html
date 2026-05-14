@@ -414,6 +414,64 @@
   /* CHART */
   .chart-container { position: relative; height: 220px; }
 
+  /* CAMPAÑAS */
+  .camp-list {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .camp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .camp-row {
+    display: grid;
+    grid-template-columns: 50px 24px 1fr 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    margin-bottom: 4px;
+    font-size: 12px;
+  }
+  .camp-fecha {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .camp-icon { font-size: 14px; }
+  .camp-canal {
+    color: var(--text-primary);
+    text-transform: capitalize;
+  }
+  .camp-tipo {
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-family: monospace;
+  }
+  .camp-cantidad {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .camp-empty {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
   /* FOOTER */
   .footer {
     text-align: center;
@@ -673,10 +731,11 @@ function render(d) {
       <div class="section-title">Evolución diaria</div>
       <div class="card">
         <div class="card-title">Tendencia del período</div>
-        <div class="card-subtitle">Leads · Confirmaciones · Altas</div>
+        <div class="card-subtitle">Leads · Confirmaciones · Altas · Campañas (marcadores)</div>
         <div class="chart-container">
           <canvas id="chartEvolucion"></canvas>
         </div>
+        ${renderCampanias(d.campanias)}
       </div>
     </div>
 
@@ -712,7 +771,7 @@ function render(d) {
     });
   });
 
-  renderChart(d.evolucion);
+  renderChart(d.evolucion, d.campanias);
 }
 
 function segLabel(s) {
@@ -724,6 +783,40 @@ function segLabel(s) {
   }[s] || s;
 }
 
+function renderCampanias(campanias) {
+  if (!campanias || campanias.length === 0) {
+    return `<div class="camp-empty">📭 Sin campañas en el período</div>`;
+  }
+
+  const iconCanal = (canal) => {
+    const c = (canal || "").toLowerCase();
+    if (c.includes("mail") || c.includes("email")) return "📧";
+    if (c.includes("whatsapp") || c.includes("wpp")) return "💬";
+    if (c.includes("sms")) return "📱";
+    return "📣";
+  };
+
+  const totalEnvios = campanias.reduce((a, c) => a + (c.cantidad || 0), 0);
+
+  return `
+    <div class="camp-list">
+      <div class="camp-header">
+        <span>📣 Campañas en el período</span>
+        <span style="color:var(--text-muted);">${campanias.length} campaña${campanias.length>1?'s':''} · ${totalEnvios.toLocaleString('es-AR')} envíos</span>
+      </div>
+      ${campanias.map(c => `
+        <div class="camp-row">
+          <span class="camp-fecha">${c.fecha_label}</span>
+          <span class="camp-icon">${iconCanal(c.canal)}</span>
+          <span class="camp-canal">${c.canal}</span>
+          <span class="camp-tipo">${c.tipo}</span>
+          <span class="camp-cantidad">${c.cantidad.toLocaleString('es-AR')}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
 function renderPerfRow(nombre, data) {
   return `
     <tr>
@@ -733,14 +826,53 @@ function renderPerfRow(nombre, data) {
   `;
 }
 
-function renderChart(evolucion) {
+function renderChart(evolucion, campanias) {
   const ctx = document.getElementById('chartEvolucion').getContext('2d');
   if (chartEvolucion) chartEvolucion.destroy();
+
+  // Mapeo de campañas a posición en el eje X (por fecha_label)
+  const labelsChart = evolucion.map(e => e.fecha);
+  const camPorLabel = {};
+  if (campanias && campanias.length > 0) {
+    campanias.forEach(c => {
+      if (!camPorLabel[c.fecha_label]) camPorLabel[c.fecha_label] = [];
+      camPorLabel[c.fecha_label].push(c);
+    });
+  }
+
+  // Plugin para dibujar líneas verticales en fechas con campañas
+  const campaniaLines = {
+    id: 'campaniaLines',
+    afterDraw(chart) {
+      const { ctx, chartArea, scales } = chart;
+      if (!chartArea) return;
+      Object.keys(camPorLabel).forEach(label => {
+        const idx = labelsChart.indexOf(label);
+        if (idx === -1) return;
+        const x = scales.x.getPixelForValue(idx);
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = 'rgba(236, 72, 153, 0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(x, chartArea.top);
+        ctx.lineTo(x, chartArea.bottom);
+        ctx.stroke();
+        // Icono arriba de la línea
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#ec4899';
+        ctx.font = '14px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText('📣', x, chartArea.top - 4);
+        ctx.restore();
+      });
+    }
+  };
 
   chartEvolucion = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: evolucion.map(e => e.fecha),
+      labels: labelsChart,
       datasets: [
         {
           label: 'Leads',
@@ -800,7 +932,17 @@ function renderChart(evolucion) {
           borderWidth: 1,
           titleColor: '#e8ecf4',
           bodyColor: '#8b93a7',
-          padding: 10
+          padding: 10,
+          callbacks: {
+            afterBody: function(tooltipItems) {
+              const label = tooltipItems[0].label;
+              const cams = camPorLabel[label];
+              if (!cams || cams.length === 0) return null;
+              return ['', '📣 Campañas ese día:', ...cams.map(c =>
+                `  · ${c.canal} ${c.tipo}: ${c.cantidad.toLocaleString('es-AR')}`
+              )];
+            }
+          }
         }
       },
       scales: {
@@ -816,7 +958,8 @@ function renderChart(evolucion) {
           beginAtZero: true
         }
       }
-    }
+    },
+    plugins: [campaniaLines]
   });
 }
 

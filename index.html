@@ -264,6 +264,18 @@
     border-color: var(--accent);
     color: var(--accent);
   }
+  .promo-badge {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 6px;
+    background: rgba(245,158,11,0.18);
+    color: var(--orange);
+    border-radius: 100px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    vertical-align: middle;
+  }
 
   .funnel-table {
     width: 100%;
@@ -658,7 +670,7 @@ function render(d) {
           <div class="funnel-title">Embudo del período · vista <span style="color:var(--accent);">${segLabel(currentSegmento)}</span></div>
           <div class="funnel-segments" id="segBtns">
             <button class="seg-btn ${currentSegmento==='todos'?'active':''}" data-seg="todos">Todos</button>
-            <button class="seg-btn ${currentSegmento==='cliente_promo_a'?'active':''}" data-seg="cliente_promo_a">Promo A</button>
+            <button class="seg-btn ${currentSegmento==='cliente_promo_a'?'active':''}" data-seg="cliente_promo_a">Promo A <span class="promo-badge">25% OFF</span></button>
             <button class="seg-btn ${currentSegmento==='cliente_promo_b'?'active':''}" data-seg="cliente_promo_b">Promo B</button>
             <button class="seg-btn ${currentSegmento==='empleado'?'active':''}" data-seg="empleado">Empleado</button>
           </div>
@@ -874,8 +886,8 @@ function renderChart(evolucion, campanias) {
       labels: labelsChart,
       datasets: [
         {
-          label: 'Leads',
-          data: evolucion.map(e => e.leads),
+          label: 'Cotizaciones',
+          data: evolucion.map(e => e.cotizaciones),
           borderColor: '#6366f1',
           backgroundColor: 'rgba(99,102,241,0.1)',
           borderWidth: 2,

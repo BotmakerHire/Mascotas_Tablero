@@ -669,48 +669,25 @@ function render(d) {
       </div>
     </div>
 
-    <div class="two-col">
-
+    <div class="section">
+      <div class="section-title">Evolución diaria</div>
       <div class="card">
-        <div class="card-title">Evolución diaria</div>
-        <div class="card-subtitle">Leads · Confirmaciones · Altas en el período</div>
+        <div class="card-title">Tendencia del período</div>
+        <div class="card-subtitle">Leads · Confirmaciones · Altas</div>
         <div class="chart-container">
           <canvas id="chartEvolucion"></canvas>
         </div>
       </div>
-
-      <div class="card">
-        <div class="card-title">A/B testing — Promo A vs B</div>
-        <div class="card-subtitle">Tasa de conversión desde agente IA hasta confirmación</div>
-        <div class="ab-grid">
-          <div class="ab-card ${tasaA > tasaB && sesA > 0 ? 'winner' : ''}">
-            <div class="ab-name">Promo A</div>
-            <div class="ab-tasa">${tasaA}%</div>
-            <div class="ab-conv">${ab.cliente_promo_a.confirmaciones}/${sesA} conv.</div>
-          </div>
-          <div class="ab-card ${tasaB > tasaA && sesB > 0 ? 'winner' : ''}">
-            <div class="ab-name">Promo B</div>
-            <div class="ab-tasa">${tasaB}%</div>
-            <div class="ab-conv">${ab.cliente_promo_b.confirmaciones}/${sesB} conv.</div>
-          </div>
-        </div>
-        <div class="ab-winner-banner">${winnerHTML}</div>
-      </div>
-
     </div>
 
     <div class="section" style="margin-top:24px;">
-      <div class="section-title">Performance del agente IA por segmento</div>
+      <div class="section-title">Sesiones del agente IA por segmento</div>
       <div class="card">
         <table class="perf-table">
           <thead>
             <tr>
               <th>Segmento</th>
               <th>Sesiones</th>
-              <th>Plan válido</th>
-              <th>A normalizar</th>
-              <th>Sin plan</th>
-              <th>Tasa éxito</th>
             </tr>
           </thead>
           <tbody>
@@ -748,15 +725,10 @@ function segLabel(s) {
 }
 
 function renderPerfRow(nombre, data) {
-  const tasa = data.total > 0 ? Math.round((data.validos/data.total)*100) : 0;
   return `
     <tr>
       <td>${nombre}</td>
       <td>${data.total}</td>
-      <td class="valido">${data.validos}</td>
-      <td class="invalido">${data.invalidos}</td>
-      <td class="vacio">${data.vacios}</td>
-      <td style="color:var(--green); font-weight:700;">${tasa}%</td>
     </tr>
   `;
 }

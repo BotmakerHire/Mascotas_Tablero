@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Omint Mascotas — Dashboard en vivo</title>
+<title>Omint Mascotas — Dashboard v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -24,6 +24,7 @@
     --orange: #f59e0b;
     --red: #ef4444;
     --blue: #3b82f6;
+    --pink: #ec4899;
   }
 
   body {
@@ -39,11 +40,12 @@
 
   .container { max-width: 1400px; margin: 0 auto; }
 
+  /* HEADER */
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     flex-wrap: wrap;
     gap: 16px;
   }
@@ -86,14 +88,73 @@
     50% { opacity: 0.7; transform: scale(1.1); box-shadow: 0 0 0 6px rgba(16,185,129,0); }
   }
 
-  .section { margin-bottom: 32px; }
+  /* FILTROS DE RANGO */
+  .range-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .range-btn {
+    padding: 8px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .range-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+  .range-btn.active {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-color: transparent;
+    color: white;
+  }
+  .custom-range {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: auto;
+  }
+  .custom-range input {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 7px 10px;
+    font-size: 12px;
+    font-family: inherit;
+    color-scheme: dark;
+  }
+  .custom-range button {
+    padding: 7px 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* SECTIONS */
+  .section { margin-bottom: 24px; }
   .section-title {
     font-size: 11px;
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -105,20 +166,20 @@
     background: var(--border);
   }
 
+  /* KPIs */
   .kpi-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 14px;
-    margin-bottom: 24px;
+    gap: 12px;
   }
   .kpi {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 20px;
-    transition: all 0.2s ease;
+    padding: 18px;
     position: relative;
     overflow: hidden;
+    transition: all 0.2s ease;
   }
   .kpi::before {
     content: '';
@@ -129,195 +190,234 @@
     opacity: 0;
     transition: opacity 0.2s;
   }
-  .kpi:hover {
-    background: var(--bg-card-hover);
-    border-color: var(--border-strong);
-    transform: translateY(-2px);
-  }
+  .kpi:hover { background: var(--bg-card-hover); }
   .kpi:hover::before { opacity: 1; }
   .kpi-label {
     font-size: 11px;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-weight: 600;
   }
   .kpi-value {
-    font-size: 36px;
+    font-size: 32px;
     font-weight: 700;
     line-height: 1;
     letter-spacing: -1px;
     margin-bottom: 6px;
   }
   .kpi-sub {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-secondary);
   }
+  .kpi-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .kpi-delta.up { color: var(--green); }
+  .kpi-delta.down { color: var(--red); }
+  .kpi-delta.flat { color: var(--text-muted); }
 
+  /* FUNNEL CARD */
   .funnel-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
+    padding: 20px;
   }
-  .funnel-row {
+  .funnel-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
-  .funnel-row:last-child { margin-bottom: 0; }
-  .funnel-label {
-    width: 180px;
-    font-size: 13px;
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
-  .funnel-bar-container {
-    flex: 1;
-    height: 36px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 8px;
-    overflow: hidden;
-    position: relative;
-  }
-  .funnel-bar {
-    height: 100%;
-    border-radius: 8px;
+  .funnel-title { font-size: 14px; font-weight: 600; }
+  .funnel-segments {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding-right: 14px;
-    color: white;
-    font-weight: 700;
-    font-size: 14px;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    min-width: 40px;
+    gap: 4px;
   }
-  .funnel-pct {
-    width: 100px;
-    text-align: right;
-    font-size: 13px;
+  .seg-btn {
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 100px;
     color: var(--text-secondary);
+    font-size: 11px;
     font-weight: 600;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
   }
-  .funnel-pct-main {
-    font-size: 13px;
-    color: var(--text-secondary);
-    font-weight: 600;
-    line-height: 1;
+  .seg-btn:hover {
+    border-color: var(--border-strong);
+    color: var(--text-primary);
   }
-  .funnel-delta {
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: 0.2px;
+  .seg-btn.active {
+    background: rgba(99,102,241,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
   }
-  .funnel-delta.neutral { color: var(--text-muted); }
-  .funnel-delta.low    { color: var(--green); }
-  .funnel-delta.mid    { color: var(--orange); }
-  .funnel-delta.high   { color: var(--red); }
 
+  .funnel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .funnel-table th {
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .funnel-table th.num { text-align: right; }
+  .funnel-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .funnel-table td.num {
+    text-align: right;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .funnel-table tr:last-child td { border-bottom: none; }
+  .funnel-table tr.split td {
+    background: rgba(99,102,241,0.06);
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+  .pct-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .pct-pill.low { background: rgba(16,185,129,0.15); color: var(--green); }
+  .pct-pill.mid { background: rgba(245,158,11,0.15); color: var(--orange); }
+  .pct-pill.high { background: rgba(239,68,68,0.15); color: var(--red); }
+  .pct-pill.neutral { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+
+  /* TWO COL */
   .two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 16px;
   }
   @media (max-width: 900px) {
     .two-col { grid-template-columns: 1fr; }
-    .funnel-label { width: 110px; font-size: 12px; }
   }
   .card {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 24px;
+    padding: 20px;
   }
-  .card-title {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: var(--text-primary);
-  }
-  .card-subtitle {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: -16px;
-    margin-bottom: 16px;
-  }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .card-subtitle { font-size: 11px; color: var(--text-secondary); margin-bottom: 16px; }
 
+  /* AB TESTING */
   .ab-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
   }
-  @media (max-width: 700px) { .ab-grid { grid-template-columns: 1fr; } }
   .ab-card {
     background: rgba(255,255,255,0.02);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 18px;
+    padding: 14px;
+    text-align: center;
     position: relative;
   }
   .ab-card.winner {
-    background: rgba(16,185,129,0.05);
+    background: rgba(16,185,129,0.06);
     border-color: rgba(16,185,129,0.3);
   }
-  .ab-card.winner::before {
-    content: '🏆 Lidera';
-    position: absolute;
-    top: -10px;
-    right: 12px;
-    background: var(--green);
-    color: white;
-    padding: 3px 10px;
-    border-radius: 100px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
   .ab-name {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     font-weight: 600;
   }
-  .ab-total {
+  .ab-tasa {
     font-size: 28px;
     font-weight: 700;
-    margin-bottom: 16px;
+    margin-bottom: 4px;
     letter-spacing: -0.5px;
   }
-  .ab-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 0;
+  .ab-card.winner .ab-tasa { color: var(--green); }
+  .ab-conv {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .ab-winner-banner {
+    padding: 10px 12px;
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 10px;
     font-size: 12px;
-    border-top: 1px solid var(--border);
-  }
-  .ab-row span:first-child { color: var(--text-secondary); }
-  .ab-row span:last-child { font-weight: 600; }
-  .ab-row.valid span:last-child { color: var(--green); }
-  .ab-row.invalid span:last-child { color: var(--orange); }
-  .ab-row.empty span:last-child { color: var(--red); }
-
-  .chart-container {
-    position: relative;
-    height: 250px;
+    color: var(--green);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
+  /* PERFORMANCE AGENTE */
+  .perf-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .perf-table th, .perf-table td {
+    padding: 10px 6px;
+    text-align: right;
+  }
+  .perf-table th {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .perf-table td {
+    border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+  }
+  .perf-table tr:last-child td { border-bottom: none; }
+  .perf-table th:first-child, .perf-table td:first-child {
+    text-align: left;
+    font-weight: 600;
+  }
+  .perf-table .valido { color: var(--green); }
+  .perf-table .invalido { color: var(--orange); }
+  .perf-table .vacio { color: var(--red); }
+
+  /* CHART */
+  .chart-container { position: relative; height: 220px; }
+
+  /* FOOTER */
   .footer {
     text-align: center;
-    margin-top: 40px;
+    margin-top: 32px;
     font-size: 11px;
     color: var(--text-muted);
   }
@@ -325,7 +425,7 @@
 
   .loading {
     text-align: center;
-    padding: 60px;
+    padding: 80px;
     color: var(--text-secondary);
     font-size: 14px;
   }
@@ -337,11 +437,25 @@
   <div class="header">
     <div class="header-left">
       <h1>🐾 Omint Mascotas</h1>
-      <p>Dashboard de actividad del bot en tiempo real</p>
+      <p>Dashboard de actividad del bot</p>
     </div>
     <div class="live-badge">
       <span class="live-dot"></span>
       <span>En vivo</span>
+    </div>
+  </div>
+
+  <div class="range-filters" id="rangeFilters">
+    <button class="range-btn active" data-range="hoy">Hoy</button>
+    <button class="range-btn" data-range="ayer">Ayer</button>
+    <button class="range-btn" data-range="7d">Últimos 7 días</button>
+    <button class="range-btn" data-range="30d">Últimos 30 días</button>
+    <button class="range-btn" data-range="mes_actual">Mes actual</button>
+    <div class="custom-range">
+      <input type="date" id="customFrom">
+      <span style="color:var(--text-muted);">→</span>
+      <input type="date" id="customTo">
+      <button id="customApply">Aplicar</button>
     </div>
   </div>
 
@@ -353,7 +467,12 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbz4tunzLedk288CXnJ2uWel6nfeIa4iJV1pR7RFClPceSRh382FH5sB2wUVt5ThjCof/exec";
 const REFRESH_MS = 60000;
 let chartEvolucion = null;
+let currentRange = "hoy";
+let currentFrom = null;
+let currentTo = null;
+let currentSegmento = "todos";
 
+// HELPERS
 const tiempoRelativo = (iso) => {
   if (!iso) return 'sin actividad';
   const d = new Date(iso);
@@ -366,155 +485,279 @@ const tiempoRelativo = (iso) => {
 
 const pct = (a, b) => b === 0 ? '0%' : Math.round((a/b)*100) + '%';
 
+const delta = (a, b) => {
+  if (b === 0 && a === 0) return { val: 0, label: '—', cls: 'flat' };
+  if (b === 0) return { val: 100, label: 'nuevo', cls: 'up' };
+  const d = Math.round(((a - b) / b) * 100);
+  if (d === 0) return { val: 0, label: '0%', cls: 'flat' };
+  return {
+    val: d,
+    label: (d > 0 ? '+' : '') + d + '% vs anterior',
+    cls: d > 0 ? 'up' : 'down'
+  };
+};
+
+// FETCH
 async function cargar() {
   try {
-    const res = await fetch(API_URL);
+    let url = `${API_URL}?range=${currentRange}`;
+    if (currentRange === 'custom' && currentFrom && currentTo) {
+      url += `&from=${currentFrom}&to=${currentTo}`;
+    }
+    const res = await fetch(url);
     const d = await res.json();
+    if (d.error) {
+      document.getElementById('content').innerHTML = `<div class="loading">Error: ${d.error}</div>`;
+      return;
+    }
     render(d);
   } catch (e) {
     document.getElementById('content').innerHTML = `<div class="loading">Error al cargar datos. Reintentando...</div>`;
   }
 }
 
+// RENDER
 function render(d) {
-  const f = d.funnel_hoy;
-  const max = Math.max(f.leads, 1);
+  const f = d.funnel;
+  const fAnt = d.funnel_anterior;
+  const seg = d.segmentos_agente;
+  const ab = d.ab_testing;
 
-  const funnelPasos = [
-    { label: 'Ingresaron al bot', val: f.leads, color: 'linear-gradient(90deg, #6366f1, #818cf8)' },
-    { label: 'Pidieron cotizar', val: f.quiero_cotizar, color: 'linear-gradient(90deg, #3b82f6, #60a5fa)' },
-    { label: 'Pasaron al agente IA', val: f.pre_agente, color: 'linear-gradient(90deg, #8b5cf6, #a78bfa)' },
-    { label: 'Llegaron a confirmar', val: f.pre_confirma, color: 'linear-gradient(90deg, #ec4899, #f472b6)' },
-    { label: 'Confirmaron plan', val: f.confirmo, color: 'linear-gradient(90deg, #f59e0b, #fbbf24)' },
-    { label: 'Completaron alta', val: f.fin_onboarding, color: 'linear-gradient(90deg, #10b981, #34d399)' }
+  // Determinar ganador A/B
+  const tasaA = ab.cliente_promo_a.tasa;
+  const tasaB = ab.cliente_promo_b.tasa;
+  const sesA = ab.cliente_promo_a.sesiones;
+  const sesB = ab.cliente_promo_b.sesiones;
+  let winnerHTML = '';
+  if (sesA > 0 || sesB > 0) {
+    if (tasaA > tasaB) winnerHTML = `🏆 <strong>Promo A</strong> gana por ${(tasaA - tasaB).toFixed(1)} pts`;
+    else if (tasaB > tasaA) winnerHTML = `🏆 <strong>Promo B</strong> gana por ${(tasaB - tasaA).toFixed(1)} pts`;
+    else winnerHTML = `⚖️ Empate técnico`;
+  } else {
+    winnerHTML = `📊 Sin datos suficientes en el período`;
+  }
+
+  // Funnel pasos
+  const segKey = currentSegmento === "todos" ? "total" : currentSegmento;
+  const pasos = [
+    { label: 'Ingresaron al bot',  key: 'saludo_inicial', color: 'linear-gradient(90deg,#6366f1,#818cf8)' },
+    { label: 'Pidieron cotizar',   key: 'quiero_cotizar', color: 'linear-gradient(90deg,#3b82f6,#60a5fa)' },
+    { label: 'Pasaron al agente IA', key: 'pre_agente',   color: 'linear-gradient(90deg,#8b5cf6,#a78bfa)', splitBefore: true },
+    { label: 'Llegaron a confirmar', key: 'pre_confirma', color: 'linear-gradient(90deg,#ec4899,#f472b6)' },
+    { label: 'Confirmaron plan',   key: 'confirmo',       color: 'linear-gradient(90deg,#f59e0b,#fbbf24)' },
+    { label: 'Completaron alta',   key: 'fin_onboarding', color: 'linear-gradient(90deg,#10b981,#34d399)' }
   ];
 
-  const seg = d.segmentos_7d;
-  const totales = [seg.empleado.validos, seg.cliente_promo_a.validos, seg.cliente_promo_b.validos];
-  const maxIdx = totales.indexOf(Math.max(...totales));
+  const valor = (etapa) => f[etapa][segKey] || 0;
+  const valorAnt = (etapa) => fAnt[etapa][segKey] || 0;
+
+  // KPIs principales
+  const totalSaludos = valor('saludo_inicial');
+  const totalSaludosAnt = valorAnt('saludo_inicial');
+  const totalConfirmo = valor('confirmo');
+  const totalAlta = valor('fin_onboarding');
+  const tasaConf = totalSaludos > 0 ? Math.round((totalConfirmo/totalSaludos)*100) : 0;
+  const tasaAlta = totalSaludos > 0 ? Math.round((totalAlta/totalSaludos)*100) : 0;
+
+  const dLeads = delta(totalSaludos, totalSaludosAnt);
+  const dConf = delta(totalConfirmo, valorAnt('confirmo'));
+  const dAltas = delta(d.altas.rango, d.altas.anterior);
 
   document.getElementById('content').innerHTML = `
 
     <div class="section">
-      <div class="section-title">Resumen de hoy</div>
+      <div class="section-title">Resumen · ${d.rango.label}</div>
       <div class="kpi-grid">
         <div class="kpi">
           <div class="kpi-label">Ingresos al bot</div>
-          <div class="kpi-value">${f.leads}</div>
-          <div class="kpi-sub">leads del día</div>
+          <div class="kpi-value">${totalSaludos}</div>
+          <div class="kpi-sub">usuarios únicos</div>
+          <div class="kpi-delta ${dLeads.cls}">${dLeads.label}</div>
         </div>
         <div class="kpi">
           <div class="kpi-label">Confirmaron plan</div>
-          <div class="kpi-value">${f.confirmo}</div>
-          <div class="kpi-sub">${pct(f.confirmo, f.leads)} de los ingresos</div>
+          <div class="kpi-value">${totalConfirmo}</div>
+          <div class="kpi-sub">${tasaConf}% conversión</div>
+          <div class="kpi-delta ${dConf.cls}">${dConf.label}</div>
         </div>
         <div class="kpi">
           <div class="kpi-label">Altas completadas</div>
-          <div class="kpi-value">${d.altas.hoy}</div>
-          <div class="kpi-sub">${pct(d.altas.hoy, f.leads)} de los ingresos</div>
+          <div class="kpi-value">${d.altas.rango}</div>
+          <div class="kpi-sub">${tasaAlta}% sobre ingresos</div>
+          <div class="kpi-delta ${dAltas.cls}">${dAltas.label}</div>
         </div>
         <div class="kpi">
           <div class="kpi-label">Última actividad</div>
           <div class="kpi-value" style="font-size:22px;">${tiempoRelativo(d.ultima_actividad)}</div>
           <div class="kpi-sub">timestamp más reciente</div>
         </div>
-        <div class="kpi">
-          <div class="kpi-label">Altas últimos 30 días</div>
-          <div class="kpi-value">${d.altas.ultimos_30d}</div>
-          <div class="kpi-sub">${d.altas.ultimos_7d} en últimos 7 días</div>
-        </div>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-title">Funnel de hoy</div>
+      <div class="section-title">Funnel segmentado por promo</div>
       <div class="funnel-card">
-        ${funnelPasos.map((p, i) => {
-          const pctMostrar = pct(p.val, funnelPasos[0].val);
+        <div class="funnel-header">
+          <div class="funnel-title">Embudo del período · vista <span style="color:var(--accent);">${segLabel(currentSegmento)}</span></div>
+          <div class="funnel-segments" id="segBtns">
+            <button class="seg-btn ${currentSegmento==='todos'?'active':''}" data-seg="todos">Todos</button>
+            <button class="seg-btn ${currentSegmento==='cliente_promo_a'?'active':''}" data-seg="cliente_promo_a">Promo A</button>
+            <button class="seg-btn ${currentSegmento==='cliente_promo_b'?'active':''}" data-seg="cliente_promo_b">Promo B</button>
+            <button class="seg-btn ${currentSegmento==='empleado'?'active':''}" data-seg="empleado">Empleado</button>
+          </div>
+        </div>
 
-          // Delta vs paso anterior
-          let deltaHTML = '';
-          if (i === 0) {
-            deltaHTML = `<div class="funnel-delta neutral">inicio</div>`;
-          } else {
-            const prev = funnelPasos[i-1].val;
-            if (prev === 0) {
-              deltaHTML = `<div class="funnel-delta neutral">—</div>`;
-            } else {
-              const dropPct = Math.round(((prev - p.val) / prev) * 100);
-              let cls = 'low';
-              if (dropPct > 50) cls = 'high';
-              else if (dropPct > 20) cls = 'mid';
-              else if (dropPct <= 0) cls = 'neutral';
-              const signo = dropPct > 0 ? '−' : (dropPct < 0 ? '+' : '');
-              deltaHTML = `<div class="funnel-delta ${cls}">${signo}${Math.abs(dropPct)}% vs anterior</div>`;
-            }
-          }
+        <table class="funnel-table">
+          <thead>
+            <tr>
+              <th>Etapa</th>
+              <th class="num">Total</th>
+              <th class="num">Promo A</th>
+              <th class="num">Promo B</th>
+              <th class="num">Empleado</th>
+              <th class="num">% inicio</th>
+              <th class="num">Drop</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${pasos.map((p, i) => {
+              const total = f[p.key].total;
+              const promoA = f[p.key].cliente_promo_a;
+              const promoB = f[p.key].cliente_promo_b;
+              const empleado = f[p.key].empleado;
+              const pctInicio = pct(total, f.saludo_inicial.total);
 
-          return `
-            <div class="funnel-row">
-              <div class="funnel-label">${p.label}</div>
-              <div class="funnel-bar-container">
-                <div class="funnel-bar" style="width: ${Math.max((p.val/max)*100, 4)}%; background: ${p.color};">
-                  ${p.val}
-                </div>
-              </div>
-              <div class="funnel-pct">
-                <div class="funnel-pct-main">${pctMostrar}</div>
-                ${deltaHTML}
-              </div>
-            </div>
-          `;
-        }).join('')}
+              let dropHTML = '';
+              if (i === 0) {
+                dropHTML = `<span class="pct-pill neutral">inicio</span>`;
+              } else {
+                const prev = f[pasos[i-1].key].total;
+                if (prev === 0) {
+                  dropHTML = `<span class="pct-pill neutral">—</span>`;
+                } else {
+                  const drop = Math.round(((prev - total) / prev) * 100);
+                  let cls = 'low';
+                  if (drop > 50) cls = 'high';
+                  else if (drop > 20) cls = 'mid';
+                  else if (drop <= 0) cls = 'neutral';
+                  const signo = drop > 0 ? '−' : (drop < 0 ? '+' : '');
+                  dropHTML = `<span class="pct-pill ${cls}">${signo}${Math.abs(drop)}%</span>`;
+                }
+              }
+
+              const splitRow = p.splitBefore ? `
+                <tr class="split">
+                  <td colspan="7">↳ a partir de acá el bot identifica al titular y se puede segmentar por promo</td>
+                </tr>
+              ` : '';
+
+              return `
+                ${splitRow}
+                <tr>
+                  <td>${p.label}</td>
+                  <td class="num">${total}</td>
+                  <td class="num" style="color:${promoA>0?'var(--text-primary)':'var(--text-muted)'};">${promoA}</td>
+                  <td class="num" style="color:${promoB>0?'var(--text-primary)':'var(--text-muted)'};">${promoB}</td>
+                  <td class="num" style="color:${empleado>0?'var(--text-primary)':'var(--text-muted)'};">${empleado}</td>
+                  <td class="num" style="color:var(--text-secondary);">${pctInicio}</td>
+                  <td class="num">${dropHTML}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
       </div>
     </div>
 
     <div class="two-col">
 
-      <div class="section">
-        <div class="section-title">Evolución 7 días</div>
-        <div class="card">
-          <div class="card-title">Tendencia diaria</div>
-          <div class="card-subtitle">Leads · Confirmaciones · Altas</div>
-          <div class="chart-container">
-            <canvas id="chartEvolucion"></canvas>
-          </div>
+      <div class="card">
+        <div class="card-title">Evolución diaria</div>
+        <div class="card-subtitle">Leads · Confirmaciones · Altas en el período</div>
+        <div class="chart-container">
+          <canvas id="chartEvolucion"></canvas>
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-title">Comparativa por segmento</div>
-        <div class="card">
-          <div class="card-title">Sesiones de los últimos 7 días</div>
-          <div class="card-subtitle">Performance del agente IA por grupo</div>
-          <div class="ab-grid">
-            ${renderAB('Empleados', seg.empleado, maxIdx === 0 && seg.empleado.total > 0)}
-            ${renderAB('Cliente CON Promo', seg.cliente_promo_a, maxIdx === 1 && seg.cliente_promo_a.total > 0)}
-            ${renderAB('Cliente SIN Promo', seg.cliente_promo_b, maxIdx === 2 && seg.cliente_promo_b.total > 0)}
+      <div class="card">
+        <div class="card-title">A/B testing — Promo A vs B</div>
+        <div class="card-subtitle">Tasa de conversión desde agente IA hasta confirmación</div>
+        <div class="ab-grid">
+          <div class="ab-card ${tasaA > tasaB && sesA > 0 ? 'winner' : ''}">
+            <div class="ab-name">Promo A</div>
+            <div class="ab-tasa">${tasaA}%</div>
+            <div class="ab-conv">${ab.cliente_promo_a.confirmaciones}/${sesA} conv.</div>
+          </div>
+          <div class="ab-card ${tasaB > tasaA && sesB > 0 ? 'winner' : ''}">
+            <div class="ab-name">Promo B</div>
+            <div class="ab-tasa">${tasaB}%</div>
+            <div class="ab-conv">${ab.cliente_promo_b.confirmaciones}/${sesB} conv.</div>
           </div>
         </div>
+        <div class="ab-winner-banner">${winnerHTML}</div>
       </div>
 
+    </div>
+
+    <div class="section" style="margin-top:24px;">
+      <div class="section-title">Performance del agente IA por segmento</div>
+      <div class="card">
+        <table class="perf-table">
+          <thead>
+            <tr>
+              <th>Segmento</th>
+              <th>Sesiones</th>
+              <th>Plan válido</th>
+              <th>A normalizar</th>
+              <th>Sin plan</th>
+              <th>Tasa éxito</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${renderPerfRow('Cliente con Promo (A)', seg.cliente_promo_a)}
+            ${renderPerfRow('Cliente sin Promo (B)', seg.cliente_promo_b)}
+            ${renderPerfRow('Empleado', seg.empleado)}
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="footer">
-      Actualizado <span>${new Date(d.timestamp).toLocaleString('es-AR')}</span> · Se refresca cada 60 segundos
+      Actualizado <span>${new Date(d.timestamp).toLocaleString('es-AR')}</span> · Auto-refresh cada 60s · Rango: <span>${d.rango.from} → ${d.rango.to}</span>
     </div>
   `;
 
-  renderChart(d.evolucion_7d);
+  // Re-bind seg buttons
+  document.querySelectorAll('#segBtns .seg-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentSegmento = btn.dataset.seg;
+      render(d);
+    });
+  });
+
+  renderChart(d.evolucion);
 }
 
-function renderAB(nombre, data, esGanador) {
+function segLabel(s) {
+  return {
+    'todos': 'Todos',
+    'cliente_promo_a': 'Promo A',
+    'cliente_promo_b': 'Promo B',
+    'empleado': 'Empleado'
+  }[s] || s;
+}
+
+function renderPerfRow(nombre, data) {
+  const tasa = data.total > 0 ? Math.round((data.validos/data.total)*100) : 0;
   return `
-    <div class="ab-card ${esGanador ? 'winner' : ''}">
-      <div class="ab-name">${nombre}</div>
-      <div class="ab-total">${data.total}</div>
-      <div class="ab-row valid"><span>Con plan elegido</span><span>${data.validos}</span></div>
-      <div class="ab-row invalid"><span>Plan a normalizar</span><span>${data.invalidos}</span></div>
-      <div class="ab-row empty"><span>Sin elegir plan</span><span>${data.vacios}</span></div>
-      <div class="ab-row"><span>Tasa de éxito</span><span style="color: #10b981;">${pct(data.validos, data.total)}</span></div>
-    </div>
+    <tr>
+      <td>${nombre}</td>
+      <td>${data.total}</td>
+      <td class="valido">${data.validos}</td>
+      <td class="invalido">${data.invalidos}</td>
+      <td class="vacio">${data.vacios}</td>
+      <td style="color:var(--green); font-weight:700;">${tasa}%</td>
+    </tr>
   `;
 }
 
@@ -535,7 +778,7 @@ function renderChart(evolucion) {
           borderWidth: 2,
           tension: 0.35,
           fill: true,
-          pointRadius: 4,
+          pointRadius: 3,
           pointBackgroundColor: '#6366f1',
           pointBorderWidth: 0
         },
@@ -547,7 +790,7 @@ function renderChart(evolucion) {
           borderWidth: 2,
           tension: 0.35,
           fill: true,
-          pointRadius: 4,
+          pointRadius: 3,
           pointBackgroundColor: '#f59e0b',
           pointBorderWidth: 0
         },
@@ -559,7 +802,7 @@ function renderChart(evolucion) {
           borderWidth: 2,
           tension: 0.35,
           fill: true,
-          pointRadius: 4,
+          pointRadius: 3,
           pointBackgroundColor: '#10b981',
           pointBorderWidth: 0
         }
@@ -604,6 +847,27 @@ function renderChart(evolucion) {
     }
   });
 }
+
+// EVENTOS
+document.querySelectorAll('#rangeFilters .range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#rangeFilters .range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentRange = btn.dataset.range;
+    cargar();
+  });
+});
+
+document.getElementById('customApply').addEventListener('click', () => {
+  const from = document.getElementById('customFrom').value;
+  const to = document.getElementById('customTo').value;
+  if (!from || !to) return alert('Elegí ambas fechas');
+  document.querySelectorAll('#rangeFilters .range-btn').forEach(b => b.classList.remove('active'));
+  currentRange = 'custom';
+  currentFrom = from;
+  currentTo = to;
+  cargar();
+});
 
 cargar();
 setInterval(cargar, REFRESH_MS);

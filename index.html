@@ -598,7 +598,6 @@ function render(d) {
   // Funnel pasos
   const segKey = currentSegmento === "todos" ? "total" : currentSegmento;
   const pasos = [
-    { label: 'Ingresaron al bot',  key: 'saludo_inicial', color: 'linear-gradient(90deg,#6366f1,#818cf8)' },
     { label: 'Pidieron cotizar',   key: 'quiero_cotizar', color: 'linear-gradient(90deg,#3b82f6,#60a5fa)' },
     { label: 'Pasaron al agente IA', key: 'pre_agente',   color: 'linear-gradient(90deg,#8b5cf6,#a78bfa)', splitBefore: true },
     { label: 'Llegaron a confirmar', key: 'pre_confirma', color: 'linear-gradient(90deg,#ec4899,#f472b6)' },
@@ -609,15 +608,15 @@ function render(d) {
   const valor = (etapa) => f[etapa][segKey] || 0;
   const valorAnt = (etapa) => fAnt[etapa][segKey] || 0;
 
-  // KPIs principales
-  const totalSaludos = valor('saludo_inicial');
-  const totalSaludosAnt = valorAnt('saludo_inicial');
+  // KPIs principales (base: pidieron cotizar)
+  const totalCotizar = valor('quiero_cotizar');
+  const totalCotizarAnt = valorAnt('quiero_cotizar');
   const totalConfirmo = valor('confirmo');
   const totalAlta = valor('fin_onboarding');
-  const tasaConf = totalSaludos > 0 ? Math.round((totalConfirmo/totalSaludos)*100) : 0;
-  const tasaAlta = totalSaludos > 0 ? Math.round((totalAlta/totalSaludos)*100) : 0;
+  const tasaConf = totalCotizar > 0 ? Math.round((totalConfirmo/totalCotizar)*100) : 0;
+  const tasaAlta = totalCotizar > 0 ? Math.round((totalAlta/totalCotizar)*100) : 0;
 
-  const dLeads = delta(totalSaludos, totalSaludosAnt);
+  const dLeads = delta(totalCotizar, totalCotizarAnt);
   const dConf = delta(totalConfirmo, valorAnt('confirmo'));
   const dAltas = delta(d.altas.rango, d.altas.anterior);
 
@@ -627,8 +626,8 @@ function render(d) {
       <div class="section-title">Resumen · ${d.rango.label}</div>
       <div class="kpi-grid">
         <div class="kpi">
-          <div class="kpi-label">Ingresos al bot</div>
-          <div class="kpi-value">${totalSaludos}</div>
+          <div class="kpi-label">Pidieron cotizar</div>
+          <div class="kpi-value">${totalCotizar}</div>
           <div class="kpi-sub">usuarios únicos</div>
           <div class="kpi-delta ${dLeads.cls}">${dLeads.label}</div>
         </div>
@@ -641,7 +640,7 @@ function render(d) {
         <div class="kpi">
           <div class="kpi-label">Altas completadas</div>
           <div class="kpi-value">${d.altas.rango}</div>
-          <div class="kpi-sub">${tasaAlta}% sobre ingresos</div>
+          <div class="kpi-sub">${tasaAlta}% sobre cotizaciones</div>
           <div class="kpi-delta ${dAltas.cls}">${dAltas.label}</div>
         </div>
         <div class="kpi">
@@ -683,7 +682,7 @@ function render(d) {
               const promoA = f[p.key].cliente_promo_a;
               const promoB = f[p.key].cliente_promo_b;
               const empleado = f[p.key].empleado;
-              const pctInicio = pct(total, f.saludo_inicial.total);
+              const pctInicio = pct(total, f.quiero_cotizar.total);
 
               let dropHTML = '';
               if (i === 0) {
